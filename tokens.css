@@ -1,0 +1,131 @@
+/**
+ * Confirm Design System — CSS Design Tokens
+ * Extracted from Figma: j6GnhZh97kbTqMydn18ns8
+ * Font: Yellix TRIAL (fallback: Inter, system-ui)
+ */
+
+/* ─────────────────────────────────────────
+   BASE PALETTE (Raw Color Variables)
+───────────────────────────────────────── */
+:root {
+  /* Base */
+  --color-base-0:  #f8f8f8;
+  --color-base-1:  #ffffff;
+  --color-base-2:  #002743;
+  --color-base-3:  #48fe9b;
+  --color-base-4:  #ccebeb;
+
+  /* Brand */
+  --color-brand-primary:   #017d80;
+  --color-brand-dark:      #002743;
+  --color-brand-accent:    #48fe9b;
+  --color-brand-light:     #ccebeb;
+
+  /* ─── Semantic: Text ─── */
+  --color-text-default:    #2e2e2e;
+  --color-text-inverse:    #ffffff;
+  --color-text-secondary:  #002743;
+  --color-text-active:     #017d80;
+  --color-text-soft:       #717171;
+  --color-text-weak:       #bcbcbc;
+  --color-text-alt:        #cfd4db;
+  --color-text-alarm:      #d30c0c;
+  --color-text-alt-active: #48fe9b;
+
+  /* ─── Semantic: Borders ─── */
+  --color-border-default: #e1e1e1;
+  --color-border-soft:    #c0c0c0;
+  --color-border-weak:    #c8cdd5;
+  --color-border-focus:   #017d80;
+  --color-border-alarm:   #b3261e;
+  --color-border-success: #005924;
+  --color-border-info:    #0167b2;
+  --color-border-warning: #c74f0b;
+
+  /* ─── Semantic: Status Backgrounds ─── */
+  --color-status-success: #e6f9ee;
+  --color-status-failure: #fcebeb;
+  --color-status-info:    #e3f3ff;
+  --color-status-warning: #fff1da;
+
+  /* ─── Interactive States ─── */
+  --color-primary-default:  #017d80;
+  --color-primary-hover:    #015d60;
+  --color-primary-active:   #e2eeef;
+  --color-primary-disabled: rgba(1, 125, 128, 0.38);
+
+  --color-secondary-hover:  #eaecef;
+  --color-secondary-active: #e2eeef;
+
+  /* ─────────────────────────────────────────
+     SPACING (from Utilities collection)
+  ───────────────────────────────────────── */
+  --spacing-2:  2px;
+  --spacing-4:  4px;
+  --spacing-8:  8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+
+  /* ─────────────────────────────────────────
+     BORDER RADIUS
+  ───────────────────────────────────────── */
+  --radius-4:   4px;
+  --radius-8:   8px;
+  --radius-full: 100px;
+
+  /* ─────────────────────────────────────────
+     TYPOGRAPHY — Yellix TRIAL
+     (Font weight 350 = Regular, 700 = Bold)
+  ───────────────────────────────────────── */
+  --font-family: 'Yellix TRIAL', 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Display */
+  --type-display-01-size:    60px;
+  --type-display-01-lh:      72px;
+  --type-display-01-ls:      -0.3px;
+
+  --type-display-02-size:    48px;
+  --type-display-02-lh:      58px;
+  --type-display-02-ls:      -0.24px;
+
+  --type-display-03-size:    32px;
+  --type-display-03-lh:      44px;
+  --type-display-03-ls:      0px;
+
+  /* Headings */
+  --type-h1-size: 24px; --type-h1-lh: 32px;
+  --type-h2-size: 20px; --type-h2-lh: 28px;
+  --type-h3-size: 18px; --type-h3-lh: 26px;
+  --type-h4-size: 16px; --type-h4-lh: 24px;
+  --type-h5-size: 15px; --type-h5-lh: 30px;
+
+  /* Body */
+  --type-body-lg-size: 16px; --type-body-lg-lh: 24px;
+  --type-body-md-size: 14px; --type-body-md-lh: 21px;
+  --type-body-sm-size: 12px; --type-body-sm-lh: 18px;
+
+  /* Label */
+  --type-label-lg-size: 14px; --type-label-lg-lh: 21px;
+  --type-label-md-size: 12px; --type-label-md-lh: 16px;
+  --type-label-sm-size: 10px; --type-label-sm-lh: 12px;
+  --type-label-xs-size: 12px; --type-label-xs-lh: 10.8px;
+
+  /* Font Weights */
+  --font-weight-regular: 350;
+  --font-weight-bold:    700;
+
+  /* ─────────────────────────────────────────
+     SHADOWS
+  ───────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0, 39, 67, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 39, 67, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 39, 67, 0.16);
+
+  /* ─────────────────────────────────────────
+     LAYOUT
+  ───────────────────────────────────────── */
+  --nav-width: 240px;
+  --header-height: 56px;
+}
