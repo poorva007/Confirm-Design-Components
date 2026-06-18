@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkbox &amp; Toggle — Confirm DS</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    body { font-family: var(--font-family); background: var(--color-base-0); padding: var(--spacing-32); color: var(--color-text-default); }
+    h1 { font-size: var(--type-h2-size); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 4px; }
+    .subtitle { font-size: var(--type-body-md-size); color: var(--color-text-soft); margin-bottom: var(--spacing-32); }
+    .section { margin-bottom: var(--spacing-32); }
+    .section-label { font-size: var(--type-label-sm-size); font-weight: var(--font-weight-bold); color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: var(--spacing-12); }
+    .row { display: flex; align-items: flex-start; gap: var(--spacing-24); flex-wrap: wrap; background: #fff; padding: var(--spacing-24); border-radius: var(--radius-8); border: 1px solid var(--color-border-default); }
+    .col { display: flex; flex-direction: column; gap: var(--spacing-12); }
+    .col-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text-soft); letter-spacing: 0.5px; margin-bottom: 4px; }
+    .spec-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-8); overflow: hidden; border: 1px solid var(--color-border-default); margin-top: var(--spacing-16); max-width: 600px; }
+    .spec-table th { padding: 8px 16px; background: var(--color-base-0); font-size: 11px; font-weight: 700; color: var(--color-text-soft); text-align: left; border-bottom: 2px solid var(--color-border-default); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-table td { padding: 8px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border-default); }
+    .spec-table tr:last-child td { border-bottom: none; }
+    code { background: #f0f9f9; color: var(--color-brand-primary); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+
+    /* ── Checkbox ── */
+    /* Source: Figma 64:158 — r=3px, unchecked: stroke=#c0c0c0, checked: fill=#017d80 */
+    .cb-wrap {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      cursor: pointer; user-select: none;
+      font-size: var(--type-body-md-size); color: var(--color-text-default);
+    }
+    .cb-wrap.disabled { opacity: 0.38; cursor: not-allowed; }
+
+    .cb-box {
+      width: 16px; height: 16px; flex-shrink: 0;
+      border: 1.5px solid var(--color-border-soft);
+      border-radius: 3px;
+      background: var(--color-base-1);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.12s;
+    }
+    .cb-box svg { display: none; }
+
+    /* Hover (unchecked) */
+    .cb-wrap:not(.disabled):hover .cb-box { background: var(--color-base-0); }
+
+    /* Checked */
+    .cb-wrap.checked .cb-box { background: var(--color-primary-default); border-color: var(--color-primary-default); }
+    .cb-wrap.checked .cb-box svg { display: block; }
+
+    /* Hover checked */
+    .cb-wrap.checked:not(.disabled):hover .cb-box { background: #015d60; border-color: #015d60; }
+
+    /* Mixed / Indeterminate */
+    .cb-wrap.mixed .cb-box { background: var(--color-primary-default); border-color: var(--color-primary-default); }
+    .cb-wrap.mixed .cb-box .mixed-line { display: block; }
+    .cb-wrap.mixed .cb-box svg { display: none; }
+    .mixed-line { display: none; width: 8px; height: 2px; background: #fff; border-radius: 1px; }
+
+    /* Focus */
+    .cb-wrap:focus-within .cb-box { box-shadow: 0 0 0 3px rgba(1,125,128,0.2); }
+
+    /* Pill variant from Figma: fill=#017d80 r=100 */
+    .pill-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 20px; padding: 0 var(--spacing-8);
+      background: var(--color-primary-default);
+      color: #fff; border-radius: var(--radius-full);
+      font-size: var(--type-label-md-size); font-weight: var(--font-weight-regular);
+    }
+    .pill-tag svg { width: 12px; height: 12px; }
+
+    /* ── Toggle ── */
+    /* Source: Figma 64:158 — Toggle component */
+    .toggle-wrap {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      cursor: pointer; user-select: none;
+      font-size: var(--type-body-md-size); color: var(--color-text-default);
+    }
+    .toggle-wrap.disabled { opacity: 0.38; cursor: not-allowed; }
+
+    .toggle-track {
+      width: 36px; height: 20px; border-radius: 10px;
+      background: var(--color-border-soft);
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-thumb {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff;
+      position: absolute; top: 3px; left: 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .toggle-wrap.on .toggle-track { background: var(--color-primary-default); }
+    .toggle-wrap.on .toggle-thumb { transform: translateX(16px); }
+    .toggle-wrap:not(.disabled):hover .toggle-track { filter: brightness(0.92); }
+
+    /* Radio */
+    .radio-wrap {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      cursor: pointer; user-select: none;
+      font-size: var(--type-body-md-size); color: var(--color-text-default);
+    }
+    .radio-wrap.disabled { opacity: 0.38; cursor: not-allowed; }
+    .radio-outer {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 1.5px solid var(--color-border-soft);
+      background: var(--color-base-1);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.12s; flex-shrink: 0;
+    }
+    .radio-inner { width: 8px; height: 8px; border-radius: 50%; background: transparent; transition: background 0.12s; }
+    .radio-wrap.checked .radio-outer { border-color: var(--color-primary-default); }
+    .radio-wrap.checked .radio-inner { background: var(--color-primary-default); }
+    .radio-wrap:not(.disabled):not(.checked):hover .radio-outer { background: var(--color-base-0); }
+  </style>
+</head>
+<body>
+  <h1>Checkbox &amp; Toggle</h1>
+  <p class="subtitle">Source: Figma → Checkbox Radio Buttons &amp; Toggles/WIP 2 (64:158) · r=3px · checked fill=#017d80</p>
+
+  <div class="section">
+    <div class="section-label">Checkbox — All States</div>
+    <div class="row">
+      <div class="col">
+        <div class="col-label">Unchecked</div>
+        <label class="cb-wrap" onclick="toggle(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Default</label>
+        <label class="cb-wrap disabled"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Disabled</label>
+      </div>
+      <div class="col">
+        <div class="col-label">Checked</div>
+        <label class="cb-wrap checked" onclick="toggle(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Default</label>
+        <label class="cb-wrap checked disabled"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Disabled</label>
+      </div>
+      <div class="col">
+        <div class="col-label">Mixed</div>
+        <label class="cb-wrap mixed" onclick="toggle(this)"><span class="cb-box"><span class="mixed-line"></span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Indeterminate</label>
+        <label class="cb-wrap mixed disabled"><span class="cb-box"><span class="mixed-line"></span></span>Disabled</label>
+      </div>
+      <div class="col">
+        <div class="col-label">Pill (from Figma)</div>
+        <span class="pill-tag"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5 5.5-5.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>Label</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Toggle — All States</div>
+    <div class="row">
+      <div class="col">
+        <div class="col-label">Off</div>
+        <label class="toggle-wrap" onclick="this.classList.toggle('on')">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          Toggle off
+        </label>
+        <label class="toggle-wrap disabled">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          Disabled
+        </label>
+      </div>
+      <div class="col">
+        <div class="col-label">On</div>
+        <label class="toggle-wrap on" onclick="this.classList.toggle('on')">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          Toggle on
+        </label>
+        <label class="toggle-wrap on disabled">
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          Disabled on
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Radio Buttons</div>
+    <div class="row">
+      <div class="col">
+        <div class="col-label">Options</div>
+        <label class="radio-wrap checked" onclick="selectRadio(this, 'g1')"><span class="radio-outer"><span class="radio-inner"></span></span>Option A</label>
+        <label class="radio-wrap" onclick="selectRadio(this, 'g1')"><span class="radio-outer"><span class="radio-inner"></span></span>Option B</label>
+        <label class="radio-wrap" onclick="selectRadio(this, 'g1')"><span class="radio-outer"><span class="radio-inner"></span></span>Option C</label>
+        <label class="radio-wrap disabled"><span class="radio-outer"><span class="radio-inner"></span></span>Disabled</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Checkbox List (form usage)</div>
+    <div class="row" style="flex-direction:column;gap:var(--spacing-8);max-width:300px">
+      <label class="cb-wrap checked" onclick="toggle(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>HVAC</label>
+      <label class="cb-wrap" onclick="toggle(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Electrical</label>
+      <label class="cb-wrap checked" onclick="toggle(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Plumbing</label>
+      <label class="cb-wrap" onclick="toggle(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Safety</label>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Figma Token Specs</div>
+    <table class="spec-table">
+      <thead><tr><th>Property</th><th>Value</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr><td>Checkbox size</td><td>16×16px</td><td>—</td></tr>
+        <tr><td>Border radius</td><td>3px</td><td>—</td></tr>
+        <tr><td>Unchecked border</td><td>#c0c0c0</td><td><code>--color-border-soft</code></td></tr>
+        <tr><td>Unchecked bg (hover)</td><td>#f8f8f8</td><td><code>--color-base-0</code></td></tr>
+        <tr><td>Checked bg</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Checked (hover)</td><td>#ccebeb</td><td><code>--color-brand-light</code></td></tr>
+        <tr><td>Pill bg</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Pill radius</td><td>100px</td><td><code>--radius-full</code></td></tr>
+        <tr><td>Toggle on</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Toggle off</td><td>#c0c0c0</td><td><code>--color-border-soft</code></td></tr>
+        <tr><td>Disabled opacity</td><td>0.38</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function toggle(el) {
+      if (el.classList.contains('disabled')) return;
+      el.classList.toggle('checked');
+    }
+    function selectRadio(el, group) {
+      document.querySelectorAll(`.radio-wrap`).forEach(r => r.classList.remove('checked'));
+      el.classList.add('checked');
+    }
+  </script>
+</body>
+</html>

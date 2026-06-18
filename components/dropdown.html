@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dropdown — Confirm DS</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    body { font-family: var(--font-family); background: var(--color-base-0); padding: var(--spacing-32); color: var(--color-text-default); }
+    h1 { font-size: var(--type-h2-size); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 4px; }
+    .subtitle { font-size: var(--type-body-md-size); color: var(--color-text-soft); margin-bottom: var(--spacing-32); }
+    .section { margin-bottom: var(--spacing-32); }
+    .section-label { font-size: var(--type-label-sm-size); font-weight: var(--font-weight-bold); color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: var(--spacing-12); }
+    .row { display: flex; align-items: flex-start; gap: var(--spacing-24); flex-wrap: wrap; background: #fff; padding: var(--spacing-24); border-radius: var(--radius-8); border: 1px solid var(--color-border-default); }
+    .spec-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-8); overflow: hidden; border: 1px solid var(--color-border-default); margin-top: var(--spacing-16); max-width: 600px; }
+    .spec-table th { padding: 8px 16px; background: var(--color-base-0); font-size: 11px; font-weight: 700; color: var(--color-text-soft); text-align: left; border-bottom: 2px solid var(--color-border-default); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-table td { padding: 8px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border-default); }
+    .spec-table tr:last-child td { border-bottom: none; }
+    code { background: #f0f9f9; color: var(--color-brand-primary); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+
+    /* ── Dropdown / Input Field Component ── */
+    /* Source: Figma 83:1032 — State=Default fill=#f8f8f8 stroke=#c0c0c0 r=4 · State=Search/Select stroke=#017d80 */
+    .dropdown-wrap { position: relative; width: 280px; }
+
+    .field-label {
+      display: block;
+      font-size: var(--type-label-md-size); font-weight: var(--font-weight-bold);
+      color: var(--color-primary-default);
+      margin-bottom: 4px;
+    }
+
+    .dropdown-trigger {
+      width: 100%; height: 40px;
+      padding: 0 var(--spacing-8);
+      background: var(--color-base-0);
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-4);
+      font-family: var(--font-family); font-size: 16px; font-weight: var(--font-weight-regular);
+      color: var(--color-text-soft);
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .dropdown-trigger:hover { border-color: var(--color-border-soft); background: #efefef; }
+    .dropdown-trigger.open, .dropdown-trigger.selected {
+      background: var(--color-base-1);
+      border-color: var(--color-primary-default);
+    }
+    .dropdown-trigger.selected .trigger-text { color: var(--color-text-default); }
+
+    .trigger-selected-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--color-primary-default);
+      color: #fff; border-radius: var(--radius-full);
+      font-size: var(--type-label-md-size); font-weight: var(--font-weight-bold);
+      padding: 2px var(--spacing-8); height: 24px;
+    }
+
+    .chevron { color: var(--color-text-soft); transition: transform 0.2s; flex-shrink: 0; }
+    .open .chevron { transform: rotate(180deg); }
+
+    /* Search input state */
+    .dropdown-search {
+      width: 100%; height: 40px; padding: 0 var(--spacing-8);
+      background: var(--color-base-1);
+      border: 1px solid var(--color-primary-default);
+      border-radius: var(--radius-4);
+      font-family: var(--font-family); font-size: 16px;
+      color: var(--color-text-soft); outline: none;
+      box-shadow: 0 0 0 3px rgba(1,125,128,0.12);
+    }
+
+    /* Dropdown panel */
+    .dropdown-panel {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--color-base-1);
+      border-radius: var(--radius-4);
+      box-shadow: var(--shadow-md);
+      z-index: 20;
+      overflow: hidden;
+      display: none;
+    }
+    .dropdown-panel.visible { display: block; }
+
+    .panel-select-all {
+      display: flex; align-items: center; gap: var(--spacing-8);
+      padding: var(--spacing-8) var(--spacing-12);
+      border-bottom: 1px solid var(--color-border-default);
+      font-size: var(--type-body-md-size); color: var(--color-text-soft);
+      cursor: pointer;
+    }
+
+    .panel-options { max-height: 152px; overflow-y: auto; }
+
+    .panel-option {
+      display: flex; align-items: center; gap: var(--spacing-8);
+      padding: var(--spacing-8) var(--spacing-12);
+      font-size: var(--type-body-md-size); color: var(--color-text-default);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .panel-option:hover { background: var(--color-base-0); }
+    .panel-option.selected { background: var(--color-brand-light); color: var(--color-primary-default); font-weight: var(--font-weight-bold); }
+
+    /* CB inside option */
+    .opt-cb { width: 16px; height: 16px; border: 1.5px solid var(--color-border-soft); border-radius: 3px; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .opt-cb.checked { background: var(--color-primary-default); border-color: var(--color-primary-default); }
+    .opt-cb svg { display: none; }
+    .opt-cb.checked svg { display: block; }
+
+    /* Input field (text field variant) */
+    .input-field-wrap { width: 280px; }
+    .input-field {
+      width: 100%; height: 40px; padding: 0 36px 0 var(--spacing-8);
+      background: var(--color-base-1); border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-4);
+      font-family: var(--font-family); font-size: 16px; font-weight: var(--font-weight-regular);
+      color: var(--color-text-default); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .input-field:focus { border-color: var(--color-primary-default); box-shadow: 0 0 0 3px rgba(1,125,128,0.15); }
+    .input-field::placeholder { color: var(--color-text-soft); }
+    .input-field-wrap { position: relative; }
+    .input-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--color-text-soft); pointer-events: none; }
+
+    /* Disabled */
+    .dropdown-trigger.disabled, .input-field:disabled {
+      opacity: 0.38; cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dropdown</h1>
+  <p class="subtitle">Source: Figma → Dropdown/WIP 4 (83:1032) · Default fill=#f8f8f8 stroke=#c0c0c0 · Open stroke=#017d80 · r=4px · h=40px</p>
+
+  <div class="section">
+    <div class="section-label">States</div>
+    <div class="row" style="align-items:flex-end">
+
+      <!-- Default -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11px;font-weight:700;color:var(--color-text-soft);text-transform:uppercase;letter-spacing:0.5px">Default</span>
+        <div class="dropdown-wrap">
+          <label class="field-label">Status</label>
+          <div class="dropdown-trigger" onclick="openDropdown('dd1')">
+            <span class="trigger-text" style="color:var(--color-text-soft)">Placeholder</span>
+            <svg class="chevron" width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search/Open -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11px;font-weight:700;color:var(--color-text-soft);text-transform:uppercase;letter-spacing:0.5px">Search / Open</span>
+        <div class="dropdown-wrap">
+          <label class="field-label">Status</label>
+          <input class="dropdown-search" type="text" placeholder="Search…" />
+          <div class="dropdown-panel visible" style="position:relative;top:4px;margin-top:0">
+            <div class="panel-select-all">
+              <span class="opt-cb"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+              Select all visible
+            </div>
+            <div class="panel-options">
+              <div class="panel-option selected"><span class="opt-cb checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Open</div>
+              <div class="panel-option"><span class="opt-cb"></span>In Progress</div>
+              <div class="panel-option"><span class="opt-cb"></span>Completed</div>
+              <div class="panel-option"><span class="opt-cb"></span>Deferred</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11px;font-weight:700;color:var(--color-text-soft);text-transform:uppercase;letter-spacing:0.5px">Selected</span>
+        <div class="dropdown-wrap">
+          <label class="field-label">Status</label>
+          <div class="dropdown-trigger selected" onclick="openDropdown('dd2')">
+            <span class="trigger-selected-pill">Open<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+            <svg class="chevron" width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disabled -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:11px;font-weight:700;color:var(--color-text-soft);text-transform:uppercase;letter-spacing:0.5px">Disabled</span>
+        <div class="dropdown-wrap">
+          <label class="field-label" style="opacity:0.38">Priority</label>
+          <div class="dropdown-trigger disabled">
+            <span class="trigger-text" style="color:var(--color-text-soft)">High</span>
+            <svg class="chevron" width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Interactive Dropdown</div>
+    <div class="row">
+      <div class="dropdown-wrap" id="dd1" style="z-index:10">
+        <label class="field-label">Assigned To</label>
+        <div class="dropdown-trigger" id="dd1-trigger" onclick="toggleDd('dd1')">
+          <span class="trigger-text" id="dd1-text" style="color:var(--color-text-soft)">Select assignee…</span>
+          <svg class="chevron" width="8" height="5" viewBox="0 0 8 5" fill="none"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="dropdown-panel" id="dd1-panel">
+          <div class="panel-options">
+            <div class="panel-option" onclick="selectOpt('dd1','Sarah Chen')">Sarah Chen</div>
+            <div class="panel-option" onclick="selectOpt('dd1','Marcus Webb')">Marcus Webb</div>
+            <div class="panel-option" onclick="selectOpt('dd1','Priya Sharma')">Priya Sharma</div>
+            <div class="panel-option" onclick="selectOpt('dd1','Tom Bradley')">Tom Bradley</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-field-wrap">
+        <label class="field-label">Search Assets</label>
+        <div style="position:relative">
+          <svg class="input-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="input-field" type="text" placeholder="Search…" style="padding-left:28px" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Figma Token Specs</div>
+    <table class="spec-table">
+      <thead><tr><th>Property</th><th>Value</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr><td>Default background</td><td>#f8f8f8</td><td><code>--color-base-0</code></td></tr>
+        <tr><td>Default border</td><td>#c0c0c0</td><td><code>--color-border-soft</code></td></tr>
+        <tr><td>Open/Focus border</td><td>#017d80</td><td><code>--color-border-focus</code></td></tr>
+        <tr><td>Open/Focus background</td><td>#ffffff</td><td><code>--color-base-1</code></td></tr>
+        <tr><td>Height</td><td>40px</td><td>—</td></tr>
+        <tr><td>Border radius</td><td>4px</td><td><code>--radius-4</code></td></tr>
+        <tr><td>Label color</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Placeholder</td><td>#717171</td><td><code>--color-text-soft</code></td></tr>
+        <tr><td>Selected pill bg</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Option hover bg</td><td>#f8f8f8</td><td><code>--color-base-0</code></td></tr>
+        <tr><td>Option selected bg</td><td>#ccebeb</td><td><code>--color-brand-light</code></td></tr>
+        <tr><td>Panel shadow</td><td>shadow-md</td><td><code>--shadow-md</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function toggleDd(id) {
+      const panel = document.getElementById(id + '-panel');
+      const trigger = document.getElementById(id + '-trigger');
+      const isOpen = panel.classList.contains('visible');
+      panel.classList.toggle('visible');
+      trigger.classList.toggle('open');
+    }
+    function selectOpt(id, val) {
+      const text = document.getElementById(id + '-text');
+      text.textContent = val;
+      text.style.color = 'var(--color-text-default)';
+      document.getElementById(id + '-panel').classList.remove('visible');
+      document.getElementById(id + '-trigger').classList.remove('open');
+      document.getElementById(id + '-trigger').classList.add('selected');
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dropdown-wrap')) {
+        document.querySelectorAll('.dropdown-panel').forEach(p => p.classList.remove('visible'));
+        document.querySelectorAll('.dropdown-trigger').forEach(t => t.classList.remove('open'));
+      }
+    });
+  </script>
+</body>
+</html>

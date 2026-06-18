@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accordion — Confirm DS</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    body { font-family: var(--font-family); background: var(--color-base-0); padding: var(--spacing-32); color: var(--color-text-default); }
+    h1 { font-size: var(--type-h2-size); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 4px; }
+    .subtitle { font-size: var(--type-body-md-size); color: var(--color-text-soft); margin-bottom: var(--spacing-32); }
+    .section { margin-bottom: var(--spacing-32); max-width: 640px; }
+    .section-label { font-size: var(--type-label-sm-size); font-weight: var(--font-weight-bold); color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: var(--spacing-12); }
+    .spec-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-8); overflow: hidden; border: 1px solid var(--color-border-default); margin-top: var(--spacing-16); }
+    .spec-table th { padding: 8px 16px; background: var(--color-base-0); font-size: 11px; font-weight: 700; color: var(--color-text-soft); text-align: left; border-bottom: 2px solid var(--color-border-default); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-table td { padding: 8px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border-default); }
+    .spec-table tr:last-child td { border-bottom: none; }
+    code { background: #f0f9f9; color: var(--color-brand-primary); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+
+    /* ── Accordion Component ── */
+    /* Source: Figma 75:682 — State=Closed fill=#fff stroke=#c0c0c0 315x56 / State=Open 315x204 */
+    .accordion { border: 1px solid var(--color-border-soft); border-radius: var(--radius-4); background: var(--color-base-1); overflow: hidden; }
+    .accordion + .accordion { margin-top: var(--spacing-4); }
+
+    .accordion-header {
+      display: flex; align-items: center; gap: var(--spacing-8);
+      padding: 0 var(--spacing-16);
+      height: 56px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .accordion-header:hover { background: var(--color-base-0); }
+
+    .accordion-title {
+      font-size: var(--type-h4-size);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary-default);
+      flex: 1;
+    }
+
+    .accordion-counter {
+      height: 17px; min-width: 25px; padding: 0 6px;
+      background: var(--color-base-0);
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-full);
+      font-size: var(--type-label-md-size);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-default);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    .accordion-chevron {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-text-soft);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .accordion.open .accordion-chevron { transform: rotate(180deg); }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-top: 0px solid var(--color-border-default);
+    }
+
+    .accordion.open .accordion-body {
+      max-height: 600px;
+      border-top-width: 1px;
+    }
+
+    .accordion-content {
+      padding: var(--spacing-16);
+      display: flex; flex-direction: column; gap: var(--spacing-12);
+    }
+
+    /* Text field used inside accordion (from Figma) */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-16); }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field-label { font-size: var(--type-label-md-size); font-weight: var(--font-weight-bold); color: var(--color-text-soft); }
+    .field-input {
+      height: 36px; padding: 0 var(--spacing-8);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-4);
+      font-family: var(--font-family); font-size: var(--type-body-md-size);
+      color: var(--color-text-default); background: var(--color-base-1);
+      outline: none;
+    }
+    .field-input:focus { border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(1,125,128,0.15); }
+
+    /* Flush variant — no outer border, items separated by lines */
+    .accordion-group-flush .accordion { border-radius: 0; border-left: none; border-right: none; border-top: none; }
+    .accordion-group-flush .accordion:first-child { border-top: 1px solid var(--color-border-default); }
+    .accordion-group-flush .accordion + .accordion { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>Accordion</h1>
+  <p class="subtitle">Source: Figma → Accordion/WIP 3 (75:682) · State=Closed 315×56, State=Open 315×204 · stroke=#c0c0c0</p>
+
+  <div class="section">
+    <div class="section-label">Default — Closed &amp; Open</div>
+
+    <!-- Closed -->
+    <div class="accordion" onclick="toggle(this)">
+      <div class="accordion-header">
+        <div class="accordion-title">General Details</div>
+        <span class="accordion-counter">3</span>
+        <span class="accordion-chevron">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <div class="field-row">
+            <div class="field"><label class="field-label">Site</label><input class="field-input" placeholder="North Orbital Road (A405)" /></div>
+            <div class="field"><label class="field-label">Feature ID</label><input class="field-input" placeholder="1900A405/40" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Work Group</label><input class="field-input" placeholder="Highways Agency" /></div>
+            <div class="field"><label class="field-label">Action Officer</label><input class="field-input" placeholder="Jim Boom" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Open by default -->
+    <div class="accordion open" onclick="toggle(this)" style="margin-top:var(--spacing-4)">
+      <div class="accordion-header">
+        <div class="accordion-title">Inspection Details</div>
+        <span class="accordion-counter">5</span>
+        <span class="accordion-chevron">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <div class="field-row">
+            <div class="field"><label class="field-label">Earliest Due Date</label><input class="field-input" type="date" value="2026-06-18" /></div>
+            <div class="field"><label class="field-label">Latest Due Date</label><input class="field-input" type="date" value="2026-07-18" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Measurement</label><input class="field-input" placeholder="138.00 Linear Metres" /></div>
+            <div class="field"><label class="field-label">Inspection Type</label><input class="field-input" placeholder="Safety Inspection" /></div>
+          </div>
+          <div class="field"><label class="field-label">Location Notes</label><input class="field-input" placeholder="A405 main carriageway EB leading from A405 roundabout at M1 J6" /></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion" onclick="toggle(this)" style="margin-top:var(--spacing-4)">
+      <div class="accordion-header">
+        <div class="accordion-title">Attachments</div>
+        <span class="accordion-chevron">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+      <div class="accordion-body">
+        <div class="accordion-content">
+          <p style="font-size:var(--type-body-md-size);color:var(--color-text-soft)">No attachments added yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Flush variant (no outer card border)</div>
+    <div style="background:#fff;border:1px solid var(--color-border-default);border-radius:var(--radius-8);overflow:hidden">
+      <div class="accordion-group-flush">
+        <div class="accordion" onclick="toggle(this)">
+          <div class="accordion-header"><div class="accordion-title">Summary</div><span class="accordion-counter">12</span><span class="accordion-chevron"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+          <div class="accordion-body"><div class="accordion-content"><p style="font-size:var(--type-body-md-size);color:var(--color-text-soft)">Summary content goes here.</p></div></div>
+        </div>
+        <div class="accordion open" onclick="toggle(this)">
+          <div class="accordion-header"><div class="accordion-title">Work Order Items</div><span class="accordion-counter">4</span><span class="accordion-chevron"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+          <div class="accordion-body"><div class="accordion-content"><div class="field-row"><div class="field"><label class="field-label">SOR Code</label><input class="field-input" placeholder="100.010" /></div><div class="field"><label class="field-label">Rate</label><input class="field-input" placeholder="176.5490" /></div></div></div></div>
+        </div>
+        <div class="accordion" onclick="toggle(this)">
+          <div class="accordion-header"><div class="accordion-title">Notes</div><span class="accordion-chevron"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></div>
+          <div class="accordion-body"><div class="accordion-content"><p style="font-size:var(--type-body-md-size);color:var(--color-text-soft)">No notes added.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Figma Token Specs</div>
+    <table class="spec-table">
+      <thead><tr><th>Property</th><th>Value</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr><td>Background</td><td>#ffffff</td><td><code>--color-base-1</code></td></tr>
+        <tr><td>Border</td><td>#c0c0c0</td><td><code>--color-border-soft</code></td></tr>
+        <tr><td>Title Color</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Title Font Size</td><td>16px</td><td><code>--type-h4-size</code></td></tr>
+        <tr><td>Title Font Weight</td><td>700</td><td><code>--font-weight-bold</code></td></tr>
+        <tr><td>Header Height (closed)</td><td>56px</td><td>—</td></tr>
+        <tr><td>Content Height (open)</td><td>204px (variable)</td><td>—</td></tr>
+        <tr><td>Counter background</td><td>#f8f8f8</td><td><code>--color-base-0</code></td></tr>
+        <tr><td>Counter border</td><td>#c0c0c0</td><td><code>--color-border-soft</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function toggle(el) {
+      el.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

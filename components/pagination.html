@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pagination — Confirm DS</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    body { font-family: var(--font-family); background: var(--color-base-0); padding: var(--spacing-32); color: var(--color-text-default); }
+    h1 { font-size: var(--type-h2-size); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 4px; }
+    .subtitle { font-size: var(--type-body-md-size); color: var(--color-text-soft); margin-bottom: var(--spacing-32); }
+    .section { margin-bottom: var(--spacing-32); }
+    .section-label { font-size: var(--type-label-sm-size); font-weight: var(--font-weight-bold); color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: var(--spacing-12); }
+    .row { display: flex; align-items: center; gap: var(--spacing-16); flex-wrap: wrap; background: #fff; padding: var(--spacing-24); border-radius: var(--radius-8); border: 1px solid var(--color-border-default); }
+    .spec-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius-8); overflow: hidden; border: 1px solid var(--color-border-default); margin-top: var(--spacing-16); max-width: 600px; }
+    .spec-table th { padding: 8px 16px; background: var(--color-base-0); font-size: 11px; font-weight: 700; color: var(--color-text-soft); text-align: left; border-bottom: 2px solid var(--color-border-default); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-table td { padding: 8px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border-default); }
+    .spec-table tr:last-child td { border-bottom: none; }
+    code { background: #f0f9f9; color: var(--color-brand-primary); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+
+    /* ── Pagination Component ── */
+    /* Source: Figma 103:3645
+       Slot: Selected fill=#017d80 r=8 32×32 | Default fill=#f8f8f8 stroke=#c0c0c0 r=8 32×32 | Hover fill=#eaecef r=8 32×32 */
+
+    .pagination { display: inline-flex; align-items: center; gap: var(--spacing-4); }
+
+    .page-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--color-border-soft);
+      border-radius: var(--radius-8);
+      background: var(--color-base-0);
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: var(--type-label-lg-size);
+      font-weight: var(--font-weight-regular);
+      color: var(--color-text-soft);
+      transition: all 0.12s;
+      user-select: none;
+    }
+    .page-btn:hover:not(:disabled):not(.active) {
+      background: var(--color-secondary-hover);
+      border-color: var(--color-border-soft);
+      color: var(--color-text-default);
+    }
+    .page-btn.active {
+      background: var(--color-primary-default);
+      border-color: var(--color-primary-default);
+      color: #fff;
+      font-weight: var(--font-weight-bold);
+    }
+    .page-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    .page-btn.arrow { color: var(--color-text-soft); }
+    .page-btn.arrow:hover:not(:disabled) { color: var(--color-text-secondary); }
+
+    .page-ellipsis {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-text-soft);
+      font-size: var(--type-label-lg-size);
+    }
+
+    /* Pagination with info text */
+    .pagination-row {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: var(--spacing-12);
+      background: #fff; padding: var(--spacing-12) var(--spacing-16);
+      border-radius: var(--radius-8); border: 1px solid var(--color-border-default);
+    }
+    .pagination-info { font-size: var(--type-label-md-size); color: var(--color-text-soft); }
+
+    /* Per-page selector */
+    .per-page-wrap { display: flex; align-items: center; gap: var(--spacing-8); font-size: var(--type-label-md-size); color: var(--color-text-soft); }
+    .per-page-select {
+      height: 28px; padding: 0 20px 0 var(--spacing-8);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-4);
+      font-family: var(--font-family); font-size: var(--type-label-md-size);
+      color: var(--color-text-default);
+      background: var(--color-base-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5l3 3 3-3' stroke='%23717171' stroke-width='1.2' fill='none'/%3E%3C/svg%3E") no-repeat right 6px center;
+      appearance: none; outline: none; cursor: pointer;
+    }
+    .per-page-select:focus { border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(1,125,128,0.12); }
+
+    /* Simple arrow-only variant (minimal) */
+    .pagination-minimal { display: inline-flex; align-items: center; gap: var(--spacing-8); }
+    .pag-arrow {
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-4);
+      background: var(--color-base-1);
+      cursor: pointer; color: var(--color-text-soft);
+      transition: all 0.12s;
+    }
+    .pag-arrow:hover:not(:disabled) { border-color: var(--color-primary-default); color: var(--color-primary-default); }
+    .pag-arrow:disabled { opacity: 0.38; cursor: not-allowed; }
+    .pag-page-text { font-size: var(--type-label-md-size); color: var(--color-text-soft); min-width: 80px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Pagination</h1>
+  <p class="subtitle">Source: Figma → Pagination/WIP 5 (103:3645) · Slot: Selected fill=#017d80 r=8 32×32 · Default fill=#f8f8f8 stroke=#c0c0c0 · Hover fill=#eaecef</p>
+
+  <div class="section">
+    <div class="section-label">Default Pagination</div>
+    <div class="row">
+      <nav class="pagination" id="pag1" aria-label="Pagination">
+        <button class="page-btn arrow" disabled aria-label="First">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="page-btn active" onclick="setPage(this,'pag1')">1</button>
+        <button class="page-btn" onclick="setPage(this,'pag1')">2</button>
+        <button class="page-btn" onclick="setPage(this,'pag1')">3</button>
+        <span class="page-ellipsis">…</span>
+        <button class="page-btn" onclick="setPage(this,'pag1')">8</button>
+        <button class="page-btn" onclick="setPage(this,'pag1')">9</button>
+        <button class="page-btn" onclick="setPage(this,'pag1')">10</button>
+        <button class="page-btn arrow" aria-label="Next">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">With Rows Per Page + Info (Full Toolbar)</div>
+    <div class="pagination-row">
+      <div class="per-page-wrap">
+        Rows per page:
+        <select class="per-page-select" onchange="updateInfo(this.value)">
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div class="pagination-info" id="pag-info">Showing <strong>1–25</strong> of <strong>147</strong> results</div>
+      <nav class="pagination" id="pag2" aria-label="Pagination">
+        <button class="page-btn arrow" disabled>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9 2L5 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 2L1 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="page-btn arrow" disabled>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="page-btn active" onclick="setPage(this,'pag2')">1</button>
+        <button class="page-btn" onclick="setPage(this,'pag2')">2</button>
+        <button class="page-btn" onclick="setPage(this,'pag2')">3</button>
+        <span class="page-ellipsis">…</span>
+        <button class="page-btn" onclick="setPage(this,'pag2')">6</button>
+        <button class="page-btn arrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="page-btn arrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Minimal (arrow only)</div>
+    <div class="row">
+      <div class="pagination-minimal">
+        <button class="pag-arrow" disabled>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <span class="pag-page-text">Page <strong>1</strong> of <strong>10</strong></span>
+        <button class="pag-arrow">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Page slot states (from Figma)</div>
+    <div class="row" style="gap:var(--spacing-8)">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="page-btn">7</div>
+        <span style="font-size:10px;color:var(--color-text-soft)">Default</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="page-btn" style="background:var(--color-secondary-hover)">7</div>
+        <span style="font-size:10px;color:var(--color-text-soft)">Hover</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="page-btn active">7</div>
+        <span style="font-size:10px;color:var(--color-text-soft)">Selected</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="page-btn" style="opacity:0.38">7</div>
+        <span style="font-size:10px;color:var(--color-text-soft)">Disabled</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Figma Token Specs</div>
+    <table class="spec-table">
+      <thead><tr><th>Property</th><th>Value</th><th>Token</th></tr></thead>
+      <tbody>
+        <tr><td>Slot size</td><td>32×32px</td><td>—</td></tr>
+        <tr><td>Border radius</td><td>8px</td><td><code>--radius-8</code></td></tr>
+        <tr><td>Default bg</td><td>#f8f8f8</td><td><code>--color-base-0</code></td></tr>
+        <tr><td>Default border</td><td>#c0c0c0</td><td><code>--color-border-soft</code></td></tr>
+        <tr><td>Hover bg</td><td>#eaecef</td><td><code>--color-secondary-hover</code></td></tr>
+        <tr><td>Selected bg</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+        <tr><td>Selected text</td><td>#ffffff</td><td><code>--color-text-inverse</code></td></tr>
+        <tr><td>Font size</td><td>14px</td><td><code>--type-label-lg-size</code></td></tr>
+        <tr><td>Gap between slots</td><td>4px</td><td><code>--spacing-4</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function setPage(btn, pagId) {
+      document.querySelectorAll(`#${pagId} .page-btn:not(.arrow)`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function updateInfo(perPage) {
+      document.getElementById('pag-info').innerHTML = `Showing <strong>1–${perPage}</strong> of <strong>147</strong> results`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Components — Confirm DS</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    body { font-family: var(--font-family); background: var(--color-base-0); padding: var(--spacing-32); color: var(--color-text-default); max-width: 900px; margin: 0 auto; }
+    .header { background: var(--color-brand-dark); border-radius: var(--radius-8); padding: var(--spacing-24) var(--spacing-32); margin-bottom: var(--spacing-32); color: #fff; }
+    .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .header p { font-size: 14px; color: rgba(255,255,255,0.65); }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-brand-accent); text-decoration: none; margin-bottom: var(--spacing-16); }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-16); }
+    .card { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-8); padding: var(--spacing-24); text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: var(--spacing-8); transition: box-shadow 0.15s, transform 0.15s; }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .card-icon { font-size: 28px; }
+    .card-title { font-size: var(--type-h4-size); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); }
+    .card-desc { font-size: var(--type-body-sm-size); color: var(--color-text-soft); line-height: 1.5; }
+    .card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: var(--radius-full); background: var(--color-brand-light); color: var(--color-primary-default); }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../tokens-reference.html">← Token Reference</a>
+  <div class="header">
+    <h1>Components</h1>
+    <p>All components extracted from Figma — interactive HTML/CSS, built on design tokens</p>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="button.html">
+      <div class="card-icon">🔘</div>
+      <div class="card-title">Button</div>
+      <div class="card-desc">Primary, secondary, ghost, danger variants across all states and sizes.</div>
+      <div class="card-meta"><span class="tag">Primary</span><span class="tag">Secondary</span><span class="tag">Ghost</span><span class="tag">Danger</span></div>
+    </a>
+    <a class="card" href="accordion.html">
+      <div class="card-icon">🪗</div>
+      <div class="card-title">Accordion</div>
+      <div class="card-desc">Collapsible panels with open/closed states, counters, and flush variant.</div>
+      <div class="card-meta"><span class="tag">Closed</span><span class="tag">Open</span><span class="tag">Flush</span></div>
+    </a>
+    <a class="card" href="checkbox-toggle.html">
+      <div class="card-icon">☑️</div>
+      <div class="card-title">Checkbox &amp; Toggle</div>
+      <div class="card-desc">Checkbox (unchecked/checked/mixed), radio buttons, and toggle switches.</div>
+      <div class="card-meta"><span class="tag">Checkbox</span><span class="tag">Toggle</span><span class="tag">Radio</span></div>
+    </a>
+    <a class="card" href="dropdown.html">
+      <div class="card-icon">📋</div>
+      <div class="card-title">Dropdown</div>
+      <div class="card-desc">Default, search, select, and selected states with multi-select support.</div>
+      <div class="card-meta"><span class="tag">Default</span><span class="tag">Search</span><span class="tag">Selected</span></div>
+    </a>
+    <a class="card" href="pagination.html">
+      <div class="card-icon">📄</div>
+      <div class="card-title">Pagination</div>
+      <div class="card-desc">Full, minimal, and toolbar variants with rows-per-page selector.</div>
+      <div class="card-meta"><span class="tag">Full</span><span class="tag">Minimal</span><span class="tag">Toolbar</span></div>
+    </a>
+    <a class="card" href="filter.html">
+      <div class="card-icon">🔽</div>
+      <div class="card-title">Filter</div>
+      <div class="card-desc">Chips, active tags, search bar, selects, and an advanced filter panel.</div>
+      <div class="card-meta"><span class="tag">Chips</span><span class="tag">Tags</span><span class="tag">Panel</span></div>
+    </a>
+    <a class="card" href="table.html">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Table</div>
+      <div class="card-desc">Sortable headers, group rows, accordion rows, selection, and pagination.</div>
+      <div class="card-meta"><span class="tag">Sortable</span><span class="tag">Selectable</span><span class="tag">Accordion</span></div>
+    </a>
+  </div>
+</body>
+</html>

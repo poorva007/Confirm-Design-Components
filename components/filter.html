@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filter — Confirm DS</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <style>
+    body { font-family: var(--font-family); background: var(--color-base-0); padding: var(--spacing-32); color: var(--color-text-default); }
+    h1 { font-size: var(--type-h2-size); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); margin-bottom: 4px; }
+    .subtitle { font-size: var(--type-body-md-size); color: var(--color-text-soft); margin-bottom: var(--spacing-32); }
+    .section { margin-bottom: var(--spacing-32); }
+    .section-label { font-size: var(--type-label-sm-size); font-weight: var(--font-weight-bold); color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: var(--spacing-12); }
+    code { background: #f0f9f9; color: var(--color-brand-primary); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+    .spec-table-wrap { background: #fff; border: 1px solid var(--color-border-default); border-radius: var(--radius-8); overflow: hidden; margin-top: var(--spacing-16); max-width: 600px; }
+    .spec-table { width: 100%; border-collapse: collapse; }
+    .spec-table th { padding: 8px 16px; background: var(--color-base-0); font-size: 11px; font-weight: 700; color: var(--color-text-soft); text-align: left; border-bottom: 2px solid var(--color-border-default); text-transform: uppercase; letter-spacing: 0.5px; }
+    .spec-table td { padding: 8px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border-default); }
+    .spec-table tr:last-child td { border-bottom: none; }
+
+    /* ── Filter Bar Component ── */
+    .filter-bar { display: flex; align-items: center; gap: var(--spacing-8); flex-wrap: wrap; background: #fff; padding: var(--spacing-16); border-radius: var(--radius-8); border: 1px solid var(--color-border-default); }
+
+    /* Search Input */
+    .search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 280px; }
+    .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--color-text-soft); pointer-events: none; }
+    .search-input { width: 100%; height: 31px; padding: 0 8px 0 28px; border: 1px solid var(--color-border-default); border-radius: var(--radius-4); font-family: var(--font-family); font-size: var(--type-body-md-size); color: var(--color-text-default); outline: none; background: var(--color-base-1); transition: border-color 0.15s, box-shadow 0.15s; }
+    .search-input:focus { border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(1,125,128,0.12); }
+    .search-input::placeholder { color: var(--color-text-soft); }
+
+    /* Filter Chips */
+    .filter-chip {
+      height: 24px; padding: 0 var(--spacing-8);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-full);
+      font-family: var(--font-family); font-size: var(--type-label-md-size);
+      color: var(--color-text-soft); background: var(--color-base-1);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+      transition: all 0.12s; white-space: nowrap; user-select: none;
+    }
+    .filter-chip:hover { border-color: var(--color-primary-default); color: var(--color-primary-default); }
+    .filter-chip.active { background: var(--color-brand-light); border-color: var(--color-primary-default); color: var(--color-primary-default); font-weight: var(--font-weight-bold); }
+    .filter-chip .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    /* Select */
+    .filter-select { height: 31px; padding: 0 24px 0 var(--spacing-8); border: 1px solid var(--color-border-default); border-radius: var(--radius-4); font-family: var(--font-family); font-size: var(--type-label-lg-size); color: var(--color-text-default); background: var(--color-base-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5l3 3 3-3' stroke='%23717171' stroke-width='1.2' fill='none'/%3E%3C/svg%3E") no-repeat right 6px center; appearance: none; outline: none; cursor: pointer; }
+    .filter-select:focus { border-color: var(--color-border-focus); box-shadow: 0 0 0 3px rgba(1,125,128,0.12); }
+
+    /* Active filter tags row */
+    .active-filters { display: flex; align-items: center; gap: var(--spacing-8); flex-wrap: wrap; }
+    .active-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 24px; padding: 0 var(--spacing-8);
+      background: var(--color-brand-light);
+      border: 1px solid var(--color-primary-default);
+      border-radius: var(--radius-full);
+      font-size: var(--type-label-md-size); font-weight: var(--font-weight-bold);
+      color: var(--color-primary-default);
+    }
+    .tag-remove { display: flex; align-items: center; cursor: pointer; color: var(--color-primary-default); opacity: 0.7; }
+    .tag-remove:hover { opacity: 1; }
+    .clear-all { font-size: var(--type-label-md-size); color: var(--color-text-alarm); cursor: pointer; font-weight: var(--font-weight-bold); padding: 0 4px; }
+    .clear-all:hover { text-decoration: underline; }
+
+    /* Filter panel (dropdown) */
+    .filter-panel-wrap { position: relative; }
+    .filter-panel-btn {
+      height: 31px; padding: 0 var(--spacing-12);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-4);
+      background: var(--color-base-1);
+      font-family: var(--font-family); font-size: var(--type-label-lg-size);
+      color: var(--color-text-secondary); cursor: pointer;
+      display: inline-flex; align-items: center; gap: var(--spacing-4);
+      transition: all 0.12s;
+    }
+    .filter-panel-btn:hover { background: var(--color-secondary-hover); }
+    .filter-panel-btn.has-filters { border-color: var(--color-primary-default); color: var(--color-primary-default); background: var(--color-brand-light); }
+    .filter-count { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--color-primary-default); color: #fff; font-size: 10px; font-weight: var(--font-weight-bold); }
+
+    .filter-panel {
+      position: absolute; top: calc(100% + 4px); left: 0;
+      width: 320px; background: var(--color-base-1);
+      border: 1px solid var(--color-border-default);
+      border-radius: var(--radius-8); box-shadow: var(--shadow-md);
+      z-index: 20; display: none;
+    }
+    .filter-panel.visible { display: block; }
+
+    .panel-section { padding: var(--spacing-12) var(--spacing-16); border-bottom: 1px solid var(--color-border-default); }
+    .panel-section:last-child { border-bottom: none; }
+    .panel-section-title { font-size: var(--type-label-md-size); font-weight: var(--font-weight-bold); color: var(--color-primary-default); margin-bottom: var(--spacing-8); text-transform: uppercase; letter-spacing: 0.5px; }
+    .panel-options { display: flex; flex-direction: column; gap: var(--spacing-4); }
+
+    .panel-cb-row { display: flex; align-items: center; gap: var(--spacing-8); cursor: pointer; font-size: var(--type-body-md-size); padding: 4px 0; }
+    .panel-cb-row:hover { color: var(--color-primary-default); }
+    .cb-box { width: 16px; height: 16px; border: 1.5px solid var(--color-border-soft); border-radius: 3px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.12s; }
+    .cb-box.checked { background: var(--color-primary-default); border-color: var(--color-primary-default); }
+    .cb-box svg { display: none; }
+    .cb-box.checked svg { display: block; }
+
+    .panel-footer { display: flex; justify-content: flex-end; gap: var(--spacing-8); padding: var(--spacing-12) var(--spacing-16); border-top: 1px solid var(--color-border-default); }
+    .btn { display: inline-flex; align-items: center; height: 28px; padding: 0 var(--spacing-12); font-family: var(--font-family); font-size: var(--type-label-lg-size); font-weight: var(--font-weight-bold); border-radius: var(--radius-4); border: 1px solid transparent; cursor: pointer; }
+    .btn-primary { background: var(--color-primary-default); color: #fff; border-color: var(--color-primary-default); }
+    .btn-secondary { background: #fff; color: var(--color-text-secondary); border-color: var(--color-border-soft); }
+  </style>
+</head>
+<body>
+  <h1>Filter</h1>
+  <p class="subtitle">Source: Figma → Filter/WIP 4 (83:309) · Chip: border=#e1e1e1 r=100 · Active: fill=#ccebeb border=#017d80</p>
+
+  <div class="section">
+    <div class="section-label">Filter Bar — Chips + Search + Select</div>
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <input class="search-input" type="text" placeholder="Search work orders…" />
+      </div>
+      <select class="filter-select">
+        <option>All Priority</option>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+      </select>
+      <select class="filter-select">
+        <option>All Assignees</option>
+        <option>Sarah Chen</option>
+        <option>Marcus Webb</option>
+        <option>Priya Sharma</option>
+      </select>
+      <button class="filter-chip active" onclick="this.classList.toggle('active')">
+        <span class="chip-dot" style="background:var(--color-primary-default)"></span>HVAC
+      </button>
+      <button class="filter-chip" onclick="this.classList.toggle('active')">Electrical</button>
+      <button class="filter-chip" onclick="this.classList.toggle('active')">Plumbing</button>
+      <button class="filter-chip" onclick="this.classList.toggle('active')">Safety</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Active Filter Tags</div>
+    <div style="background:#fff;padding:var(--spacing-16);border-radius:var(--radius-8);border:1px solid var(--color-border-default)">
+      <div style="font-size:var(--type-label-md-size);color:var(--color-text-soft);margin-bottom:var(--spacing-8)">Active filters:</div>
+      <div class="active-filters" id="active-tags">
+        <span class="active-tag">HVAC <span class="tag-remove" onclick="removeTag(this)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span>
+        <span class="active-tag">High Priority <span class="tag-remove" onclick="removeTag(this)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span>
+        <span class="active-tag">Sarah Chen <span class="tag-remove" onclick="removeTag(this)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span>
+        <span class="clear-all" onclick="clearAll()">Clear all</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Advanced Filter Panel (dropdown)</div>
+    <div style="background:#fff;padding:var(--spacing-16);border-radius:var(--radius-8);border:1px solid var(--color-border-default)">
+      <div class="filter-panel-wrap">
+        <button class="filter-panel-btn has-filters" onclick="togglePanel()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Filters
+          <span class="filter-count">3</span>
+        </button>
+        <div class="filter-panel" id="filter-panel">
+          <div class="panel-section">
+            <div class="panel-section-title">Status</div>
+            <div class="panel-options">
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Open</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>In Progress</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Completed</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Deferred</label>
+            </div>
+          </div>
+          <div class="panel-section">
+            <div class="panel-section-title">Priority</div>
+            <div class="panel-options">
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>High</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Medium</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Low</label>
+            </div>
+          </div>
+          <div class="panel-section">
+            <div class="panel-section-title">Category</div>
+            <div class="panel-options">
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box checked"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>HVAC</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Electrical</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Plumbing</label>
+              <label class="panel-cb-row" onclick="toggleCb(this)"><span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></span>Safety</label>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <button class="btn btn-secondary" onclick="togglePanel()">Cancel</button>
+            <button class="btn btn-primary" onclick="togglePanel()">Apply Filters</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Figma Token Specs</div>
+    <div class="spec-table-wrap">
+      <table class="spec-table">
+        <thead><tr><th>Property</th><th>Value</th><th>Token</th></tr></thead>
+        <tbody>
+          <tr><td>Chip height</td><td>24px</td><td>—</td></tr>
+          <tr><td>Chip border radius</td><td>100px</td><td><code>--radius-full</code></td></tr>
+          <tr><td>Chip border (default)</td><td>#e1e1e1</td><td><code>--color-border-default</code></td></tr>
+          <tr><td>Chip bg (active)</td><td>#ccebeb</td><td><code>--color-brand-light</code></td></tr>
+          <tr><td>Chip border (active)</td><td>#017d80</td><td><code>--color-border-focus</code></td></tr>
+          <tr><td>Chip text (active)</td><td>#017d80</td><td><code>--color-primary-default</code></td></tr>
+          <tr><td>Tag remove color</td><td>#d30c0c</td><td><code>--color-text-alarm</code></td></tr>
+          <tr><td>Panel shadow</td><td>shadow-md</td><td><code>--shadow-md</code></td></tr>
+          <tr><td>Panel border radius</td><td>8px</td><td><code>--radius-8</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function togglePanel() {
+      document.getElementById('filter-panel').classList.toggle('visible');
+    }
+    function toggleCb(el) {
+      el.querySelector('.cb-box').classList.toggle('checked');
+    }
+    function removeTag(btn) { btn.closest('.active-tag').remove(); }
+    function clearAll() { document.getElementById('active-tags').innerHTML = '<span style="font-size:13px;color:var(--color-text-soft)">No active filters</span>'; }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.filter-panel-wrap')) document.getElementById('filter-panel').classList.remove('visible');
+    });
+  </script>
+</body>
+</html>
